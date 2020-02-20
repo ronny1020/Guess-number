@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+
+</head>
+<!-- guess number" -->
+<style>
+    body {
+        background-color: aliceblue;
+    }
+    
+    .input_string {
+        font-weight: bold;
+    }
+    
+    .result {
+        font-weight: bold;
+    }
+    
+    .left_times_print {
+        font-weight: bold;
+        min-width: 1.5rem;
+        display: inline-block;
+        text-align: center;
+    }
+    
+    .setting-switch {
+        display: inline-block;
+    }
+    
+    .noCount {
+        min-width: 2.5rem;
+        display: inline-block;
+        text-align: center;
+    }
+    
+    .congratulation {
+        font-style: italic;
+    }
+    
+    .setting-switch {
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .info {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        /* right: 0; */
+        /* left: 0; */
+        /* display: flex; */
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .info_bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        opacity: 0.3;
+    }
+    
+    .info .card {
+        background-color: white;
+        z-index: 1;
+        width: 68%;
+        height: 68%;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .info .card h1 {
+        font-size: 10vw;
+        font-weight: bold;
+    }
+    
+    .info .card p {
+        font-size: 3vw;
+    }
+    
+    #main_result {
+        align-self: center;
+        font-size: 5rem;
+        height: 7rem;
+    }
+    
+    #result_printing {
+        min-height: 3rem;
+    }
+    
+    #left_times {
+        min-width: 150px;
+        padding: 0.5rem;
+        position: absolute;
+        right: 0;
+    }
+    
+    #info {
+        display: none;
+    }
+    
+    #setting {
+        display: none;
+    }
+</style>
+
+<body>
+
+
+    <div class='my-5 mx-auto container card p-5 form-group'>
+
+        <!-- main input -->
+        <form id="input_area_form" onkeypress="return event.keyCode != 13">
+            <label>Input number:</label>
+            <input type="number" id="input_area" class="form-control">
+
+            <!-- buttons -->
+            <div class="mt-3">
+                <input type="button" id="btn_guess" onclick="guess()" value="Enter" class="btn btn-primary">
+                <input type="button" id="btn_restart" onclick="start()" value="Restart" class="btn btn-danger ml-3 ">
+                <div class="setting-switch  pt-3 ml-5 h-100 p-3">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="ORS" onclick="ORSF()">
+                        <label class="custom-control-label" for="ORS">Open Restart Setting</label>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <!-- setting -->
+        <div class="mt-5" id="setting">
+            <hr class="px-0">
+            <form id="setting_form" class="mt-5 form-group">
+                <label>Input number of Character:</label>
+                <input type="number" value="4" id="NumChars" class="form-control mb-4">
+                <label>Input times of guess:</label>
+                <input type="number" value="20" id="GuessTimes" class="form-control">
+                <p>(Keep it unfilled or input 0 for Unlimited Mode.)</p>
+            </form>
+        </div>
+    </div>
+    <!-- LOG -->
+
+    <div class="container card p-3" id="container">
+        <h1 id="main_result"></h1>
+        <p id="left_times"></p>
+        <div id="result_printing"></div>
+    </div>
+
+    <!-- information pop -->
+    <div class="info" id="info" onclick="info_close()">
+        <div class="info_bg">
+
+        </div>
+        <div class="card" id="info_main">
+
+        </div>
+    </div>
+</body>
+<script>
+    body = document.body;
+
+    // faster create element(element, context, Attribute(,), Attribute(,), Attribute(,)........)
+    HTMLElement.prototype.CreateAppend = function(element, context, ...attr) {
+        e = document.createElement(element)
+        if (context != undefined) {
+            e.innerHTML = context;
+        }
+        for (i = 0; i < Math.floor(attr.length); i = i + 2) {
+            e.setAttribute(attr[i], attr[i + 1]);
+
+        }
+        this.appendChild(e);
+    }
+
+
+    input_area_form.addEventListener("keyup", function(event) {
+        //  enter key 13
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            if (info.style.display == "flex") {
+                info.style.display = "none";
+            } else {
+                if (btn_guess.disabled == false) {
+                    btn_guess.click();
+                } else {
+                    btn_restart.click();
+                }
+            }
+        }
+    });
+
+
+    setting_form.addEventListener("keyup", function(event) {
+        //  enter key 13
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            btn_restart.click();
+        }
+    });
+
+
+
+
+    // -------------------------------------------------------------------------------
+    start()
+
+
+
+    function setAnswer() {
+        nc = Number(NumChars.value);
+        answer = Math.floor(Math.random() * 10 ** nc).toString();
+        if (answer.length < nc) {
+            answer = "0".repeat(nc - answer.length) + answer;
+        }
+
+        console.log("ans:" + answer);
+    }
+
+
+
+
+
+
+
+
+    // check the result
+    function result(input) {
+        console.log(input)
+        input_string = input.toString();
+        if (input_string.length == 0) {
+            return [3, 0]
+        } else if (answer.length != input_string.length) {
+            return [0, `Wrong length.`]
+        } else if (input_string.match(/[^0-9]/)) {
+            return [0, `"${input_string.match(/[^0-9]/)}" is NOT number character.`]
+        } else {
+            a = 0;
+            b = 0;
+            for (i = 0; i < answer.length; i++) {
+                if (input_string.charAt(i) == answer.charAt(i)) {
+                    a++
+                } else {
+                    for (j = 0; j < answer.length; j++) {
+                        if (input_string.charAt(i) == answer.charAt(j)) {
+                            b++
+                            break
+                        }
+                    }
+                }
+            }
+            if (a == answer.length) {
+                return [2, `${a}A${b}B`]
+            } else {
+                return [1, `${a}A${b}B`]
+            }
+        }
+
+
+    };
+
+    function numberCount() {
+        count_input100 = count_input % 100
+
+        if (count_input100 % 10 == 1 && count_input100 != 11) {
+            noCount = `${count_input}st`;
+        } else if (count_input100 % 10 == 2 && count_input100 != 12) {
+            noCount = `${count_input}nd`;
+        } else if (count_input100 % 10 == 2 && count_input100 != 12) {
+            noCount = `${count_input}rd`;
+        } else {
+            noCount = `${count_input}th`
+        }
+    }
+
+    // print the result
+    function guess() {
+        number_input = input_area.value;
+
+
+
+
+        p = document.createElement('p')
+        guess_input_result = result(number_input)
+        console.log(guess_input_result)
+
+        if (guess_input_result[0] == 3) {
+            p = '';
+        } else if (guess_input_result[0] == 1) {
+            count_input++
+            numberCount()
+            main_result.innerHTML = guess_input_result[1];
+            numGuessTimesLeft = numGuessTimes - count_input;
+            p.CreateAppend('span', 'Your ');
+            p.CreateAppend('span', noCount, 'class', 'noCount');
+            p.CreateAppend('span', ' guess is "');
+            p.CreateAppend('span', input_string, 'class', 'input_string');
+            p.CreateAppend('span', '", the result is "');
+            p.CreateAppend('span', guess_input_result[1], 'class', 'result');
+            if (UnlimitedMode == 0) {
+                p.CreateAppend('span', '", you only left ');
+                p.CreateAppend('span', numGuessTimesLeft, 'class', 'left_times_print');
+                p.CreateAppend('span', ' times of Guess.');
+                left_times.innerHTML = `Left Times: ${numGuessTimesLeft}`;
+            } else {
+                p.CreateAppend('span', '".');
+            }
+        } else if (guess_input_result[0] == 2) {
+            count_input++
+            numberCount()
+            main_result.innerHTML = guess_input_result[1];
+            p.CreateAppend('span', 'Your ');
+            p.CreateAppend('span', noCount, 'class', 'noCount');
+            p.CreateAppend('span', ' guess is "');
+            p.CreateAppend('span', input_string, 'class', 'input_string');
+            p.CreateAppend('span', '", the result is "');
+            p.CreateAppend('span', guess_input_result[1], 'class', 'result');
+            p.CreateAppend('span', '", ');
+            p.CreateAppend('span', 'congratulation!!', 'class', 'congratulation');
+            if (UnlimitedMode == 0) {
+                left_times.innerHTML = `Left Times: ${numGuessTimesLeft}`;
+            } else {
+
+            }
+            congratulate()
+        } else {
+            main_result.innerHTML = "XXXX";
+            p.innerHTML = `${guess_input_result[1]}`;
+
+        }
+
+        if (numGuessTimesLeft == 0 && UnlimitedMode == 0) {
+            no_guess()
+        }
+        result_printing.appendChild(p);
+        result_printing.insertBefore(p, result_printing.childNodes[0]);
+        input_area_form.reset()
+        input_area.focus()
+    }
+
+    function start() {
+        setAnswer()
+        if (answer === "0") {
+            alert('You must input a number greater than "0".');
+            btn_guess.disabled = true;
+            return
+        }
+        container.removeChild(result_printing)
+        container.CreateAppend('div', '', 'id', 'result_printing');
+
+        numGuessTimes = Number(GuessTimes.value);
+        count_input = 0
+        numGuessTimesLeft = numGuessTimes - count_input;
+        input_area_form.reset()
+        main_result.innerHTML = "";
+        btn_guess.disabled = false;
+        ORS.checked = false;
+        ORSF()
+        if (numGuessTimes > 0) {
+            left_times.innerHTML = `Left Times: ${numGuessTimesLeft}`;
+            UnlimitedMode = 0;
+        } else {
+            left_times.innerHTML = `Unlimited Mode`;
+            UnlimitedMode = 1;
+        }
+    }
+    // open restart setting function
+    function ORSF() {
+        if (ORS.checked == true) {
+            setting.style.display = "block";
+        } else {
+            setting.style.display = "none";
+        }
+    }
+
+    function info_close() {
+        info.style.display = "none";
+    }
+
+    function congratulate() {
+        btn_guess.disabled = true;
+        info.style.display = "flex";
+        info.removeChild(info_main);
+        info.CreateAppend('div', '', 'class', 'card', 'id', 'info_main');
+        info_main.CreateAppend('h1', 'You Win!', 'class', 'text-success');
+        info_main.CreateAppend('p', 'Congratulation! Good game.');
+
+    }
+
+    function no_guess() {
+        btn_guess.disabled = true;
+        info.style.display = "flex";
+        info.removeChild(info_main);
+        info.CreateAppend('div', '', 'class', 'card', 'id', 'info_main');
+        info_main.CreateAppend('h1', 'You Lose!', 'class', 'text-danger');
+        info_main.CreateAppend('p', 'You have no times of guess left.');
+
+    }
+</script>
+
+</body>
+
+</html>
